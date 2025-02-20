@@ -19,3 +19,41 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.bg-gray-custom {
+  background-color: rgb(227, 227, 227);
+}
+
+.bg-black-custom {
+  background-color: rgb(44, 44, 44);
+}
+
+.text-black-custom {
+  color: rgb(30,30,30);
+}
+
+.text-gray-custom {
+  color: rgb(245,245,245);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.border-custom {
+  border: 2px solid rgb(118,118,118); /* Ajusta el color y el grosor del borde según tus necesidades */
+}
