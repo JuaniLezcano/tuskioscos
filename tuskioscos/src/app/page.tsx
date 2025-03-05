@@ -1,3 +1,4 @@
+'use client'
 import Image from "next/image";
 import HeaderLogged from "@/components/Header/headerLogged";
 import HeaderUnlogged from "@/components/Header/headerUnlogged";
