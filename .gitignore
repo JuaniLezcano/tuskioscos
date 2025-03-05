@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/tuskioscos/node_modules
+/tuskioscos-front/node_modules
 /tuskioscos-back/node_modules
 /.pnp
 .pnp.*
@@ -12,17 +12,17 @@
 !.yarn/versions
 
 # testing
-/tuskioscos/coverage
+/tuskioscos-front/coverage
 /tuskioscos-back/coverage
 
 # next.js
-/tuskioscos/.next/
+/tuskioscos-front/.next/
 /tuskioscos-back/.next/
-/tuskioscos/out/
+/tuskioscos-front/out/
 /tuskioscos-back/out/
 
 # production
-/tuskioscos/build
+/tuskioscos-front/build
 /tuskioscos-back/build
 
 # misc
@@ -36,14 +36,14 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-/tuskioscos/.env*
+/tuskioscos-front/.env*
 /tuskioscos-back/.env*
 
 # vercel
 .vercel
 
 # typescript
-/tuskioscos/*.tsbuildinfo
+/tuskioscos-front/*.tsbuildinfo
 /tuskioscos-back/*.tsbuildinfo
-/tuskioscos/next-env.d.ts
+/tuskioscos-front/next-env.d.ts
 /tuskioscos-back/next-env.d.ts
