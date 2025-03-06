@@ -2,7 +2,7 @@ const prisma = require("../prisma/client");
 const { hashPassword, comparePassword, generateToken } = require("../services/authService");
 
 // Register de User
-app.post("/register", async (req, res) => {
+exports.register = async (req, res) => {
     const { email, name, password } = req.body;
     try {
         const hashedPassword = await hashPassword(password);
@@ -13,13 +13,13 @@ app.post("/register", async (req, res) => {
                 password: hashedPassword,
             },
             });
-        res.json(user);
+        res.json({userId: user.id, email: user.email, name: user.name});
     } catch (error) {
         res.status(400).json({ error: error.message });
-    }});
+    }};
 
 // Login de User
-app.post("/login", async (req, res) => {
+exports.login = async (req, res) => {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({
         where: {
@@ -35,4 +35,4 @@ app.post("/login", async (req, res) => {
     }
     const token = generateToken(user.id);
     res.json({ token });
-});
+};
