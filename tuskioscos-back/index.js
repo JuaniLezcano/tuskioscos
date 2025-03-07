@@ -1,7 +1,8 @@
 require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
 const kioscoRoutes = require("./routes/kioscoRoutes");
-const express = require('express')
+const cierreCajaRoutes = require("./routes/cierreCajaRoutes");
+const express = require('express');
 const cors = require("cors");
 
 const app = express() // Instancia de express
@@ -12,6 +13,7 @@ app.use(cors()); // Middleware para habilitar CORS
 
 app.use("/user", userRoutes); // Rutas de autenticación
 app.use("/kioscos", kioscoRoutes); // Rutas de kioscos
+app.use("/cierreCaja", cierreCajaRoutes); // Rutas de cierre de cajas
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
