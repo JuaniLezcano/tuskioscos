@@ -37,7 +37,12 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
         httpOnly: true, // Protege contra XSS
-        secure: process.env.NODE_ENV === "development", // HTTP (sin S, deberia estar en production)
+        secure: process.env.NODE_ENV === "production", // Solo HTTPS en producción
         sameSite: "strict", // Protege contra CSRF
     });
+};
+
+exports.logout = (req, res) => {
+    res.clearCookie("token");
+    res.json({ message: "Logout exitoso" });
 };
