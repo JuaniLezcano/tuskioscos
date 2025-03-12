@@ -21,11 +21,13 @@ exports.register = async (req, res) => {
 // Login de User
 exports.login = async (req, res) => {
     const { email, password } = req.body;
+
     const user = await prisma.user.findUnique({
         where: {
             email,
         },
     });
+
     if (!user) {
         return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -40,6 +42,8 @@ exports.login = async (req, res) => {
         secure: process.env.NODE_ENV === "production", // Solo HTTPS en producción
         sameSite: "strict", // Protege contra CSRF
     });
+
+    res.json({ success: true, message: "Login exitoso" });
 };
 
 exports.logout = (req, res) => {

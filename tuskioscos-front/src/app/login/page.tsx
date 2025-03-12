@@ -23,7 +23,8 @@ async function fetchData(data: LoginFormData) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: "include",
     });
 
     console.log("Estado del response:", response.status); // Verifica si se llega a esta línea
