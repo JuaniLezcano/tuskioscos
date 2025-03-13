@@ -1,7 +1,11 @@
 import { User } from '@/types'
 import React from 'react'
 
-export default async function Header() {
+interface UserProps{
+    user: User;
+}
+
+export default async function Header({ user }: UserProps) {
     return (
         <div>Header</div>
     )

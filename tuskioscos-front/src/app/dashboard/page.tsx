@@ -73,13 +73,16 @@ async function fetchUserInfo(): Promise<User> {
 
 
 export default async function Dashboard() {
+    const user: User = await fetchUserInfo()
     const kioscos: Kiosco[] = await fetchKioscos()
     const kioscosTotal = kioscos.length;
     
     return (
         <>
             <header>
-                <Header/>
+                <Header 
+                    user={user}
+                />
             </header>
             <div className="p-8">
                 <h1 className="text-2xl font-bold text-center mb-4">Número de Kioscos</h1>
