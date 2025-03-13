@@ -4,7 +4,7 @@ interface ProfileImageProps {
     name: string;
   }
 
-const ProfileImage = ({ name }: ProfileImageProps) => {
+export function ProfileImage ({ name }: ProfileImageProps) {
   const nameParts = name.split(" ");
   const firstNameInitial = nameParts[0] ? nameParts[0][0] : "";
   const lastNameInitial = nameParts[1] ? nameParts[1][0] : "";
@@ -16,4 +16,3 @@ const ProfileImage = ({ name }: ProfileImageProps) => {
     </span>
   );
 };
-export default ProfileImage;
