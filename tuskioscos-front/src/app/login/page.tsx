@@ -1,8 +1,9 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().min(1, 'El email es requerido').email('Formato de email inválido'),
@@ -15,8 +16,6 @@ type LoginFormData = {
 };
 
 async function fetchData(data: LoginFormData) {
-  console.log("Realizando fetch con:", JSON.stringify(data, null, 2));
-
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/login`, {
       method: 'POST',
@@ -27,24 +26,26 @@ async function fetchData(data: LoginFormData) {
       credentials: "include",
     });
 
-    console.log("Estado del response:", response.status); // Verifica si se llega a esta línea
+    const responseData = await response.json();
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error ${response.status}: ${errorText}`);
+      throw new Error(responseData.error || `Error ${response.status}`);    
     }
 
-    return await response.json();
+    return responseData;
   } catch (error: any) {
-    console.error("Error en fetchData:", error.message);
-    throw error; // Relanza el error para que lo maneje onSubmit
+    console.log("Error en fetchData:", error.message);
+    throw error; 
   }
 }
 
 export default function LoginForm() {
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(loginSchema)
@@ -52,39 +53,59 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      setServerError(null);
       console.log("Enviando datos:", data);
       const response = await fetchData(data);
-      console.log('Respuesta del servidor:', response);
+      if (response){
+        router.push("/dashboard")
+      }
     } catch (error) {
-      console.error('Error al hacer login:', error);
+        if (error instanceof Error) {
+          console.log('Error al hacer login:', error.message);
+    
+          // Si las credenciales son incorrectas
+          if (error.message.includes("Invalid credentials")) {
+            setError("password", { type: "manual", message: "Email o contraseña incorrectos" });
+          } else {
+            setServerError("Hubo un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.");
+          }
+        } else {
+          setServerError("Error desconocido");
+        }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow-lg">
-      <div>
-        <label className="block text-sm font-medium">Email</label>
-        <input
-          type="email"
-          {...register('email')}
-          className="w-full p-2 border rounded-lg"
-        />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-      </div>
+    <div className='flex items-center justify-center min-h-screen'>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg w-full mx-auto p-4 border rounded-lg shadow-lg">
+        <div>
+          <label className="block text-md font-medium pb-2">Email</label>
+          <input
+            type="email"
+            {...register('email')}
+            className="w-full p-2 border rounded-lg"
+          />
+          {errors.email && <p className="text-red-500 text-md">{errors.email.message}</p>}
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium">Contraseña</label>
-        <input
-          type="password"
-          {...register('password')}
-          className="w-full p-2 border rounded-lg"
-        />
-        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-      </div>
+        <div>
+          <label className="block text-md font-medium pb-2">Contraseña</label>
+          <input
+            type="password"
+            {...register('password')}
+            className="w-full p-2 border rounded-lg"
+          />
+          {errors.password && <p className="text-red-500 text-md mt-4">{errors.password.message}</p>}
+        </div>
 
-      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">
-        Iniciar sesión
-      </button>
-    </form>
+        <button type="submit" className="w-full bg-black-custom text-white p-2 rounded-lg hover:bg-gray-950">
+          Iniciar sesión
+        </button>
+
+        {serverError && (
+          <p className="text-red-500 text-md text-center">{serverError}</p>
+        )}
+      </form>
+    </div>
   );
 }
