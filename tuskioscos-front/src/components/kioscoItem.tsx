@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Kiosco } from '@/types';
 
 interface KioscoItemProps {
@@ -9,13 +9,24 @@ interface KioscoItemProps {
 
 
 export function KioscoItem({ kiosco }: KioscoItemProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+  
   return (
-      <div className="border rounded-lg p-4 mb-2 flex justify-between items-center">
-          <span>{kiosco.name}</span>
-          <div className="flex gap-2">
-              <button className="bg-blue-500 text-white px-4 py-2 rounded">Métricas</button>
-              <button className="bg-gray-800 text-white px-4 py-2 rounded">Cerrar Caja</button>
-          </div>
+    <div className="border rounded-lg p-6 mb-6 shadow-lg w-full max-w-4xl mx-auto">
+      <div className="flex justify-between items-center cursor-pointer" onClick={toggleOpen}>
+        <span className="text-lg font-medium">{kiosco.name}</span>
+        <span>{isOpen ? '-' : '+'}</span>
       </div>
+      {isOpen && (
+        <div className="flex justify-end gap-4 mt-4">
+          <button className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">Métricas</button>
+          <button className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition">Cerrar Caja</button>
+        </div>
+      )}
+    </div>
   );
 }

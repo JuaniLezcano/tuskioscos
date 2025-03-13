@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { KioscoItem } from '@/components/kioscoItem';
 import { Kiosco, User } from '@/types'
 import Header from '@/components/header';
+import { redirect } from "next/navigation";
 
 async function fetchKioscos(): Promise<Kiosco[]> {
     const cookieStore = await cookies();
@@ -24,7 +25,9 @@ async function fetchKioscos(): Promise<Kiosco[]> {
         })
 
         if (response.status === 401) {
+            redirect("/");
             throw new Error('No autorizado: Token inválido o expirado');
+            
         }
 
         if (!response.ok) {
@@ -57,11 +60,11 @@ async function fetchUserInfo(): Promise<User> {
         })
 
         if (response.status === 401) {
-            throw new Error('No autorizado: Token inválido o expirado');
+            redirect("/login");
         }
 
         if (!response.ok) {
-            throw new Error(`Error en la respuesta: ${response.status}`);
+            redirect("/login");
         }
 
         return response.json();
@@ -78,19 +81,25 @@ export default async function Dashboard() {
     const kioscosTotal = kioscos.length;
     
     return (
-        <>
+        <div className='min-h-screen flex flex-col'>
             <header>
                 <Header 
                     user={user}
                 />
             </header>
-            <div className="p-8">
-                <h1 className="text-2xl font-bold text-center mb-4">Número de Kioscos</h1>
-                <p className="text-center mb-8">{kioscosTotal}</p>
-                {kioscos.map(kiosco => (
-                    <KioscoItem key={kiosco.id} kiosco={kiosco} />
-                ))}
+            <div className='flex-1 flex items-center justify-center'>
+                <div className='w-full max-w-4xl'>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-medium mb-4">Número de Kioscos</h1>
+                        <p className="text-xl font-bold text-gray-900">{kioscosTotal}</p>
+                    </div>
+                    <div className='my-10'>
+                        {kioscos.map(kiosco => (
+                            <KioscoItem key={kiosco.id} kiosco={kiosco} />
+                        ))}
+                    </div>
+                </div>
             </div>
-        </>
+        </div>
     );
 }
