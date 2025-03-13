@@ -6,10 +6,10 @@ export default async function KioscosGrid() {
     const user = await getUser(); // Obtener usuario en el servidor
 
     return (
-        <div className="p-4">
-            <Header user={user} />
-            <h2 className="text-xl font-semibold">Kioscos</h2>
-            <p className="text-sm text-gray-600">Alta, baja y modificación</p>
+        <div className="min-h-screen flex flex-col">
+            <header>
+                <Header user={user} />
+            </header>
             <KioscosClient /> {/* Manejamos los kioscos en el cliente */}
         </div>
     );

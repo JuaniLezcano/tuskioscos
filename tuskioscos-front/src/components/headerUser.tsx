@@ -1,3 +1,4 @@
+"use client"
 import { User } from '@/types';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -10,7 +11,7 @@ export function HeaderUser({ name }: UserMenuProps) {
     const router = useRouter(); 
 
     function GestionarKioscos(){
-        router.push("dashboard/kioscos")
+        router.push("/dashboard/kioscos")
     }
 
     async function CerrarSesion() { 
