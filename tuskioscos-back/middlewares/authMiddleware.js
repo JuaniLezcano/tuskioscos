@@ -1,9 +1,15 @@
 const jwt = require("jsonwebtoken");
 
 exports.authenticate = (req, res, next) => {
-    const token = req.cookies?.token;
-
-    if (!token) return res.status(401).json({ error: "Token requerido" });
+    let token = req.cookies?.token;
+    
+    // Si no hay token en las cookies, intentar obtenerlo del encabezado Authorization
+    if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        }
+    }
 
     try {
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);

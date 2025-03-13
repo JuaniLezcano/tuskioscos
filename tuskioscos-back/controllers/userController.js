@@ -50,3 +50,14 @@ exports.logout = (req, res) => {
     res.clearCookie("token");
     res.json({ message: "Logout exitoso" });
 };
+
+exports.infoUser = async (req, res) => {
+    const { userId } = req
+    const user = await prisma.user.findUnique({
+        where: {
+            id: parseInt(userId)
+        }
+    })
+    
+    res.json(user);
+}
