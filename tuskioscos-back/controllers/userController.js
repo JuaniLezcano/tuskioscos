@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
         httpOnly: true,   // Evita acceso desde JS
-        secure: process.env.NODE_ENV === "production", // Solo HTTPS en producción
+        secure: true, 
         sameSite: "none", // Importante para cookies cross-origin
         path: "/",
     });
