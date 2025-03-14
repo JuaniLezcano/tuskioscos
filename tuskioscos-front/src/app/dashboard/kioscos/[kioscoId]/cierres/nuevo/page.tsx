@@ -105,7 +105,13 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   }
 
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-500">Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -164,6 +170,14 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              onClick={() => router.push(`/dashboard/kioscos/${kioscoId}/cierres`)}
+            >
+              Ver Cierres
             </button>
 
             <button
