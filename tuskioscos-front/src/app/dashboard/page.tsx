@@ -59,11 +59,11 @@ async function fetchUserInfo(): Promise<User> {
         })
 
         if (response.status === 401) {
-            redirect("/");
+            redirect("/login");
         }
 
         if (!response.ok) {
-            redirect("/");
+            redirect("/login");
         }
 
         return response.json();
