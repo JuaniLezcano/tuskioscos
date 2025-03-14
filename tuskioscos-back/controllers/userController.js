@@ -47,6 +47,7 @@ exports.login = async (req, res) => {
         secure: true, 
         sameSite: "none", // Importante para cookies cross-origin
         path: "/",
+        domain: ".railway.app",
     });
 
     res.json({ success: true, message: "Login exitoso" });
