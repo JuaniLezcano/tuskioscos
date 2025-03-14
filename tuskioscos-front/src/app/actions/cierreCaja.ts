@@ -1,58 +1,58 @@
-"use server";
+"use server"
 
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { CierreCaja } from "../../types"; // Ajusta la ruta según donde tengas tus tipos definidos
-import { logout } from "./user";
+import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
+import type { CierreCaja } from "../../types" // Ajusta la ruta según donde tengas tus tipos definidos
+import { logout } from "./user"
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 /**
  * Función base para realizar peticiones a la API
  */
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get("token");
-  
+  const cookieStore = await cookies()
+  const tokenCookie = cookieStore.get("token")
+
   const headers = {
     "Content-Type": "application/json",
-    ...(tokenCookie && { Authorization: `Bearer ${tokenCookie.value}` })
-  };
+    ...(tokenCookie && { Authorization: `Bearer ${tokenCookie.value}` }),
+  }
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     credentials: "include",
     headers,
     ...options,
-  });
+  })
 
   if (!res.ok) {
     // Captura el cuerpo de la respuesta de error
-    const errorText = await res.text();
-    let errorData;
-    
+    const errorText = await res.text()
+    let errorData
+
     try {
       // Intenta parsearlo como JSON
-      errorData = JSON.parse(errorText);
-    } catch (e) {
+      errorData = JSON.parse(errorText)
+    } catch (_) {
       // Si falla, usa el texto tal cual
-      errorData = { error: errorText || res.statusText };
+      errorData = { error: errorText || res.statusText }
     }
-    
+
     if (res.status === 401 || res.status === 403) {
       // Token inválido o no autorizado
-      await logout();
-      throw new Error("Token inválido o no autorizado. Se ha cerrado la sesión.");
+      await logout()
+      throw new Error("Token inválido o no autorizado. Se ha cerrado la sesión.")
     }
-    
+
     // Para errores 409 (Conflict), que suelen ser duplicados
     if (res.status === 409) {
-      throw new Error(`DUPLICATE_CIERRE: ${errorData.error || "El cierre ya existe"}`);
+      throw new Error(`DUPLICATE_CIERRE: ${errorData.error || "El cierre ya existe"}`)
     }
-    
-    throw new Error(errorData.error || `Error en la API: ${res.statusText}`);
+
+    throw new Error(errorData.error || `Error en la API: ${res.statusText}`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 /**
@@ -60,10 +60,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
  */
 export async function getAllCierreCaja(kioscoId: number): Promise<CierreCaja[]> {
   try {
-    return await fetchAPI(`/cierreCaja/${kioscoId}`);
+    return await fetchAPI(`/cierreCaja/${kioscoId}`)
   } catch (error) {
-    console.error("Error al obtener cierres de caja:", error);
-    throw new Error("No se pudieron obtener los cierres de caja");
+    console.error("Error al obtener cierres de caja:", error)
+    throw new Error("No se pudieron obtener los cierres de caja")
   }
 }
 
@@ -72,10 +72,10 @@ export async function getAllCierreCaja(kioscoId: number): Promise<CierreCaja[]> 
  */
 export async function getCierreCaja(kioscoId: number, cierreCajaId: number): Promise<CierreCaja> {
   try {
-    return await fetchAPI(`/cierreCaja/${kioscoId}/${cierreCajaId}`);
+    return await fetchAPI(`/cierreCaja/${kioscoId}/${cierreCajaId}`)
   } catch (error) {
-    console.error("Error al obtener cierre de caja:", error);
-    throw new Error("No se pudo obtener el cierre de caja");
+    console.error("Error al obtener cierre de caja:", error)
+    throw new Error("No se pudo obtener el cierre de caja")
   }
 }
 
@@ -84,60 +84,64 @@ export async function getCierreCaja(kioscoId: number, cierreCajaId: number): Pro
  */
 export async function createCierreCaja(kioscoId: number, formData: FormData): Promise<CierreCaja> {
   try {
-    const monto = formData.get("monto") as string;
-    const fecha = formData.get("fecha") as string;
-    console.log("Creating cierre de caja:", { kioscoId, monto, fecha });
+    const monto = formData.get("monto") as string
+    const fecha = formData.get("fecha") as string
+    console.log("Creating cierre de caja:", { kioscoId, monto, fecha })
 
-    if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) < 0) {
-      throw new Error("Monto inválido");
+    if (!monto || isNaN(Number.parseFloat(monto)) || Number.parseFloat(monto) < 0) {
+      throw new Error("Monto inválido")
     }
 
     const response = await fetchAPI(`/cierreCaja/${kioscoId}`, {
       method: "POST",
       body: JSON.stringify({
-        monto: parseFloat(monto),
+        monto: Number.parseFloat(monto),
         fecha,
       }),
-    });
-    
-    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
-    return response;
-  } catch (error: any) {
-    console.error("Error al crear cierre de caja:", error);
-    
+    })
+
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`)
+    return response
+  } catch (error: unknown) {
+    console.error("Error al crear cierre de caja:", error)
+
     // Reenvía el error tal cual para mantener el prefijo DUPLICATE_CIERRE si existe
-    if (error.message && error.message.includes("DUPLICATE_CIERRE")) {
-      throw error;
+    if (error instanceof Error && error.message.includes("DUPLICATE_CIERRE")) {
+      throw error
     }
-    
-    throw new Error(error instanceof Error ? error.message : "No se pudo crear el cierre de caja");
+
+    throw new Error(error instanceof Error ? error.message : "No se pudo crear el cierre de caja")
   }
 }
 
 /**
  * Actualiza un cierre de caja existente
  */
-export async function updateCierreCaja(kioscoId: number, cierreCajaId: number, formData: FormData): Promise<CierreCaja> {
+export async function updateCierreCaja(
+  kioscoId: number,
+  cierreCajaId: number,
+  formData: FormData,
+): Promise<CierreCaja> {
   try {
-    const monto = formData.get("monto") as string;
+    const monto = formData.get("monto") as string
 
-    if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) < 0) {
-      throw new Error("Monto inválido");
+    if (!monto || isNaN(Number.parseFloat(monto)) || Number.parseFloat(monto) < 0) {
+      throw new Error("Monto inválido")
     }
 
     const response = await fetchAPI(`/cierreCaja/${kioscoId}/${cierreCajaId}`, {
       method: "PUT",
       body: JSON.stringify({
-        monto: parseFloat(monto),
+        monto: Number.parseFloat(monto),
       }),
-    });
-    
-    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
-    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres/${cierreCajaId}`);
-    return response;
+    })
+
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`)
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres/${cierreCajaId}`)
+    return response
   } catch (error) {
-    console.error("Error al actualizar cierre de caja:", error);
-    throw new Error("No se pudo actualizar el cierre de caja");
+    console.error("Error al actualizar cierre de caja:", error)
+    throw new Error("No se pudo actualizar el cierre de caja")
   }
 }
 
@@ -148,13 +152,13 @@ export async function deleteCierreCaja(kioscoId: number, cierreCajaId: number): 
   try {
     const response = await fetchAPI(`/cierreCaja/${kioscoId}/${cierreCajaId}`, {
       method: "DELETE",
-    });
-    
-    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
-    return response;
+    })
+
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`)
+    return response
   } catch (error) {
-    console.error("Error al eliminar cierre de caja:", error);
-    throw new Error("No se pudo eliminar el cierre de caja");
+    console.error("Error al eliminar cierre de caja:", error)
+    throw new Error("No se pudo eliminar el cierre de caja")
   }
 }
 
@@ -162,24 +166,22 @@ export async function deleteCierreCaja(kioscoId: number, cierreCajaId: number): 
  * Obtengo las métricas de cierre de caja entre fechas
  */
 export async function metric1(fecha1: Date, fecha2: Date, kioscoId: number) {
-  const response = await getAllCierreCaja(kioscoId);
+  const response = await getAllCierreCaja(kioscoId)
 
   // Filtrar cierres entre las fechas seleccionadas
-  const cierresEntreFechas = response.filter(cierre => {
-    const fechaCierre = new Date(cierre.fecha);
-    return fechaCierre >= fecha1 && fechaCierre <= fecha2;
-  });
+  const cierresEntreFechas = response.filter((cierre) => {
+    const fechaCierre = new Date(cierre.fecha)
+    return fechaCierre >= fecha1 && fechaCierre <= fecha2
+  })
 
   // Ordenar por fecha (más reciente primero)
-  cierresEntreFechas.sort((a, b) => 
-    new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-  );
+  cierresEntreFechas.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
 
   // Calcular días laborales (días con cierre de caja)
-  const diasLaborales = cierresEntreFechas.length;
+  const diasLaborales = cierresEntreFechas.length
 
   return {
     cierresEntreFechas,
-    diasLaborales
-  };
+    diasLaborales,
+  }
 }
