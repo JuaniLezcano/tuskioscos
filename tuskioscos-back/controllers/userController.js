@@ -43,9 +43,10 @@ exports.login = async (req, res) => {
     const token = generateToken(user.id);
 
     res.cookie("token", token, {
-        httpOnly: true, // Protege contra XSS
+        httpOnly: true,   // Evita acceso desde JS
         secure: process.env.NODE_ENV === "production", // Solo HTTPS en producción
-        sameSite: "strict", // Protege contra CSRF
+        sameSite: "none", // Importante para cookies cross-origin
+        path: "/",
     });
 
     res.json({ success: true, message: "Login exitoso" });
