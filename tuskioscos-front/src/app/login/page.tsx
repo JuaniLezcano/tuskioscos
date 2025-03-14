@@ -27,6 +27,7 @@ async function fetchData(data: LoginFormData) {
     });
 
     const responseData = await response.json();
+    console.log(responseData);
 
     if (!response.ok) {
       throw new Error(responseData.error || `Error ${response.status}`);    
