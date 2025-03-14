@@ -69,21 +69,31 @@ export async function createCierreCaja(kioscoId: number, formData: FormData): Pr
   try {
     const monto = formData.get("monto") as string;
     const fecha = formData.get("fecha") as string;
+    console.log("Creating cierre de caja:", { kioscoId, monto, fecha });
+    console.log("API URL:", `${API_URL}/cierreCaja/${kioscoId}`);
 
     if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) < 0) {
       throw new Error("Monto inválido");
     }
 
-    const response = await fetchAPI(`/cierreCaja/${kioscoId}`, {
-      method: "POST",
-      body: JSON.stringify({
-        monto: parseFloat(monto),
-        fecha,
-      }),
-    });
-    
-    revalidatePath(`/kioscos/${kioscoId}/cierres`);
-    return response;
+    try {
+      const response = await fetchAPI(`/cierreCaja/${kioscoId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          monto: parseFloat(monto),
+          fecha,
+        }),
+      });
+      
+      revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
+      return response;
+    } catch (error: any) {
+      // Verificar si el error es específicamente por un cierre ya existente
+      if (error.message && error.message.includes("ya se encuentra realizado")) {
+        throw new Error("DUPLICATE_CIERRE: El cierre de caja para esta fecha ya existe");
+      }
+      throw error; // Re-lanzar cualquier otro error
+    }
   } catch (error) {
     console.error("Error al crear cierre de caja:", error);
     throw new Error(error instanceof Error ? error.message : "No se pudo crear el cierre de caja");
@@ -108,8 +118,8 @@ export async function updateCierreCaja(kioscoId: number, cierreCajaId: number, f
       }),
     });
     
-    revalidatePath(`/kioscos/${kioscoId}/cierres`);
-    revalidatePath(`/kioscos/${kioscoId}/cierres/${cierreCajaId}`);
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres/${cierreCajaId}`);
     return response;
   } catch (error) {
     console.error("Error al actualizar cierre de caja:", error);
@@ -126,7 +136,7 @@ export async function deleteCierreCaja(kioscoId: number, cierreCajaId: number): 
       method: "DELETE",
     });
     
-    revalidatePath(`/kioscos/${kioscoId}/cierres`);
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
     return response;
   } catch (error) {
     console.error("Error al eliminar cierre de caja:", error);

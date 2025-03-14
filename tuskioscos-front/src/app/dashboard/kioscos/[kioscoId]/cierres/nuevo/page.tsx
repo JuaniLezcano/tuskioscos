@@ -17,13 +17,12 @@ interface NuevoCierreCajaProps {
 export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDuplicateError, setIsDuplicateError] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const resolvedParams = use(params);
   const kioscoId = parseInt(resolvedParams.kioscoId);
-
-  // Formatear fecha actual para el input type="date"
   const [formattedDate, setFormattedDate] = useState('');
 
   useEffect(() => {
@@ -46,15 +45,25 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
     loadUser();
   }, []);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) { 
     setIsSubmitting(true);
     setError(null);
+    setIsDuplicateError(false);
 
     try {
       await createCierreCaja(kioscoId, formData);
       router.push(`/dashboard/kioscos/${kioscoId}/cierres`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ocurrió un error al crear el cierre de caja');
+      const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error al crear el cierre de caja';
+      
+      // Verificar si es error de duplicado
+      if (errorMessage.includes('DUPLICATE_CIERRE')) {
+        setIsDuplicateError(true);
+        setError("Ya existe un cierre de caja para la fecha seleccionada");
+      } else {
+        setError(errorMessage);
+      }
+      
       setIsSubmitting(false);
     }
   }
@@ -67,11 +76,14 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
     <div>
       {user && <Header user={user} />}
       <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
-        {/* Resto de tu JSX como estaba */}
         <h1 className="text-2xl font-bold mb-6 text-center">Nuevo Cierre de Caja</h1>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className={`border px-4 py-3 rounded mb-4 ${
+            isDuplicateError 
+              ? "bg-yellow-100 border-yellow-400 text-yellow-800" 
+              : "bg-red-100 border-red-400 text-red-700"
+          }`}>
             {error}
           </div>
         )}
@@ -100,6 +112,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
               type="date"
               id="fecha"
               name="fecha"
+              required
               defaultValue={formattedDate}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />

@@ -39,6 +39,19 @@ exports.createCierreCaja = async (req, res) => {
         }
     
         const fechaParseada = parseDate(fecha);
+
+        // Verificar si ya existe un cierre para esta fecha y kiosco
+        const cierreCajaExists = await prisma.cierreCaja.findFirst({
+            where: { 
+                fecha: fechaParseada,
+                kioscoId: parseInt(kioscoId)
+            }
+        });
+
+        if (cierreCajaExists) {
+            return res.status(409).json({ error: "El cierre de caja de ese día ya se encuentra realizado" });
+        }
+
         const cierreCaja = await prisma.cierreCaja.create({
             data: {
                 monto: parseFloat(monto),
@@ -48,10 +61,9 @@ exports.createCierreCaja = async (req, res) => {
         });
         res.json(cierreCaja);
     } catch (error) {
-        res.status(400).json({ error: error.message || "No se pudo realizar satisfactoriamente el cierre de caja" });
+        res.status(404).json({ error: error.message || "No se pudo realizar satisfactoriamente el cierre de caja" });
     }
 }
-
 exports.updateCierreCaja = async (req, res) => {
     const { cierreCajaId } = req.params;
     const { monto , fecha } = req.body

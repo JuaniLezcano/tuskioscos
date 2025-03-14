@@ -1,5 +1,5 @@
-const { parse } = require("date-fns");
+const { parseISO } = require("date-fns");
 
 exports.parseDate = (date) => {
-    return parse(date, "dd/MM/yyyy", new Date());
+    return parseISO(date);
 };
