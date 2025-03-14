@@ -1,33 +1,18 @@
-import { cookies } from "next/headers";  // Trae la cookie en el servidor
 import Link from "next/link";
 
-export default async function Home() {
-  // Verifica la cookie en el servidor
-  const token = (await cookies()).get("token")?.value;
-
+export default function Home() {
   return (
-    <div>
-      <header>
-        <h1>Bienvenido a nuestra plataforma</h1>
-        {!token && (
-          <div>
-            <Link href="/login">Iniciar sesión</Link> / <Link href="/register">Registrar</Link>
-          </div>
-        )}
-      </header>
-
-      {/* Si el usuario tiene el token, muestra el Dashboard */}
-      {token ? (
-        <div>
-          <h2>Bienvenido al Dashboard</h2>
-          <p>Contenido exclusivo para usuarios autenticados</p>
-        </div>
-      ) : (
-        <div>
-          <h2>Bienvenido a nuestra página</h2>
-          <p>Para aprovechar todas las funcionalidades, por favor inicie sesión o regístrese.</p>
-        </div>
-      )}
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+      <h1 className="text-5xl font-bold text-black-custom mb-4">tus kioscos</h1>
+      <p className="text-lg text-black-custom mb-16 text-center">Aplicación para gestionar los ingresos diarios de tus negocios y tomar mediciones en base a ello</p>
+      <div className="flex gap-6">
+        <Link href="/login" className="bg-gray-custom text-black-custom px-8 py-3 rounded-lg border border-black-custom text-lg font-medium hover:bg-black-custom hover:text-gray-custom transition">
+          Iniciar sesión
+        </Link>
+        <Link href="/register" className="bg-black-custom text-gray-custom px-8 py-3 rounded-lg text-lg font-medium hover:bg-gray-custom hover:text-black-custom border border-black-custom transition">
+          Registrarse
+        </Link>
+      </div>
     </div>
   );
 }

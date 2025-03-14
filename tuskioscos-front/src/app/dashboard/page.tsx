@@ -1,6 +1,5 @@
 import React from 'react'
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 import { KioscoItem } from '@/components/kioscoItem';
 import { Kiosco, User } from '@/types'
 import Header from '@/components/header';
@@ -60,11 +59,11 @@ async function fetchUserInfo(): Promise<User> {
         })
 
         if (response.status === 401) {
-            redirect("/login");
+            redirect("/");
         }
 
         if (!response.ok) {
-            redirect("/login");
+            redirect("/");
         }
 
         return response.json();

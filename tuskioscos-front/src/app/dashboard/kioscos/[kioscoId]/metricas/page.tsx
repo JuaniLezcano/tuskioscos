@@ -1,15 +1,17 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { CierreCaja, User } from '@/types'
+import { CierreCaja, Kiosco, User } from '@/types'
 import { metric1 } from '@/app/actions/cierreCaja'
 import { useParams } from 'next/navigation'
 import Header from '@/components/header'
 import { getUser } from '@/app/actions/user';
+import { getKiosco } from '@/app/actions/kioscos'
 
 export default function Metricas() {
   const { kioscoId } = useParams()
   const [user, setUser] = useState<User | null>(null);
+  const [kiosco, setKiosco] = useState<Kiosco | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: getOneMonthAgo(),
     endDate: formatDate(new Date())
@@ -22,21 +24,25 @@ export default function Metricas() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Fetch user data
-    async function fetchUserData() {
+    async function fetchData() {
       try {
         const userData = await getUser();
         setUser(userData);
+  
+        if (!kioscoId) {
+          throw new Error('ID de kiosco no encontrado');
+        }
+  
+        const kioscoData = await getKiosco(Number(kioscoId));
+        setKiosco(kioscoData);
       } catch (err) {
-        console.error('Error fetching user data:', err);
-        // Consider handling the error appropriately
+        console.error('Error fetching data:', err);
       }
     }
-    
-    fetchUserData();
+  
+    fetchData();
     fetchMetrics();
-  }, []);
-
+  }, [kioscoId]); 
   function getOneMonthAgo() {
     const today = new Date()
     const oneMonthAgo = new Date()
@@ -100,7 +106,7 @@ export default function Metricas() {
     <div>
       {user && <Header user={user} />}
       <div className="w-full max-w-4xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">Métricas del Kiosco</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Métricas de {kiosco ? kiosco.name : 'Nombre del Kiosco'}</h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-medium mb-4">Filtrar por fechas</h2>

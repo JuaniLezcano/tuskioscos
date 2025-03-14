@@ -31,7 +31,12 @@ exports.login = async (req, res) => {
     if (!user) {
         return res.status(400).json({ error: "Invalid credentials" });
     }
-    const valid = comparePassword(password, user.password);
+    const valid = await comparePassword(password, user.password);
+    
+    if (!valid) {
+        return res.status(400).json({ error: "Invalid credentials" });
+    }
+
     if (!valid) {
         return res.status(400).json({ error: "Invalid credentials" });
     }
