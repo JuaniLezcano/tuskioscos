@@ -26,12 +26,29 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   });
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
+    // Captura el cuerpo de la respuesta de error
+    const errorText = await res.text();
+    let errorData;
+    
+    try {
+      // Intenta parsearlo como JSON
+      errorData = JSON.parse(errorText);
+    } catch (e) {
+      // Si falla, usa el texto tal cual
+      errorData = { error: errorText || res.statusText };
+    }
+    
     if (res.status === 401 || res.status === 403) {
       // Token inválido o no autorizado
       await logout();
       throw new Error("Token inválido o no autorizado. Se ha cerrado la sesión.");
     }
+    
+    // Para errores 409 (Conflict), que suelen ser duplicados
+    if (res.status === 409) {
+      throw new Error(`DUPLICATE_CIERRE: ${errorData.error || "El cierre ya existe"}`);
+    }
+    
     throw new Error(errorData.error || `Error en la API: ${res.statusText}`);
   }
 
@@ -70,32 +87,29 @@ export async function createCierreCaja(kioscoId: number, formData: FormData): Pr
     const monto = formData.get("monto") as string;
     const fecha = formData.get("fecha") as string;
     console.log("Creating cierre de caja:", { kioscoId, monto, fecha });
-    console.log("API URL:", `${API_URL}/cierreCaja/${kioscoId}`);
 
     if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) < 0) {
       throw new Error("Monto inválido");
     }
 
-    try {
-      const response = await fetchAPI(`/cierreCaja/${kioscoId}`, {
-        method: "POST",
-        body: JSON.stringify({
-          monto: parseFloat(monto),
-          fecha,
-        }),
-      });
-      
-      revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
-      return response;
-    } catch (error: any) {
-      // Verificar si el error es específicamente por un cierre ya existente
-      if (error.message && error.message.includes("ya se encuentra realizado")) {
-        throw new Error("DUPLICATE_CIERRE: El cierre de caja para esta fecha ya existe");
-      }
-      throw error; // Re-lanzar cualquier otro error
-    }
-  } catch (error) {
+    const response = await fetchAPI(`/cierreCaja/${kioscoId}`, {
+      method: "POST",
+      body: JSON.stringify({
+        monto: parseFloat(monto),
+        fecha,
+      }),
+    });
+    
+    revalidatePath(`/dashboard/kioscos/${kioscoId}/cierres`);
+    return response;
+  } catch (error: any) {
     console.error("Error al crear cierre de caja:", error);
+    
+    // Reenvía el error tal cual para mantener el prefijo DUPLICATE_CIERRE si existe
+    if (error.message && error.message.includes("DUPLICATE_CIERRE")) {
+      throw error;
+    }
+    
     throw new Error(error instanceof Error ? error.message : "No se pudo crear el cierre de caja");
   }
 }

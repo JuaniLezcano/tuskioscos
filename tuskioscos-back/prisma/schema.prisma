@@ -31,8 +31,9 @@ model Kiosco {
 
 model CierreCaja {
   id        Int      @id @default(autoincrement())
-  fecha     DateTime @unique
+  fecha     DateTime
   monto     Float
   kioscoId  Int
   kiosco    Kiosco   @relation(fields: [kioscoId], references: [id])
+  @@unique([kioscoId, fecha])
 }

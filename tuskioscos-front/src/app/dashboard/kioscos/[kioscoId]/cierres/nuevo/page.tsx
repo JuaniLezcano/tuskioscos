@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createCierreCaja } from '@/app/actions/cierreCaja';
+import { createCierreCaja, getAllCierreCaja } from '@/app/actions/cierreCaja';
 import { use } from 'react';
 import Header from '@/components/header';
 import { User } from '@/types';
@@ -20,6 +20,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   const [isDuplicateError, setIsDuplicateError] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [cierresExistentes, setCierresExistentes] = useState<string[]>([]);
   const router = useRouter();
   const resolvedParams = use(params);
   const kioscoId = parseInt(resolvedParams.kioscoId);
@@ -41,29 +42,64 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
         setIsLoading(false);
       }
     }
-    
-    loadUser();
-  }, []);
 
-  async function handleSubmit(formData: FormData) { 
+    async function fetchCierres() {
+      try {
+        // Asegúrate que getAllCierreCaja filtra por kioscoId
+        const cierres = await getAllCierreCaja(kioscoId);
+        setCierresExistentes(
+          cierres.map((cierre: { fecha: any }) => {
+            const fecha = new Date(cierre.fecha);
+            return isNaN(fecha.getTime()) ? cierre.fecha : fecha.toISOString().split('T')[0];
+          })
+        );
+      } catch (err) {
+        console.error("Error al obtener cierres de caja:", err);
+      }
+    }
+
+    loadUser();
+    fetchCierres();
+  }, [kioscoId]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setIsDuplicateError(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  async function handleSubmit(formData: FormData) {
     setIsSubmitting(true);
     setError(null);
     setIsDuplicateError(false);
 
     try {
+      // Verifica si ya existe un cierre para este kiosco específico y esta fecha
+      const fechaSeleccionada = formData.get('fecha') as string;
+      
+      if (cierresExistentes.includes(fechaSeleccionada)) {
+        setIsDuplicateError(true);
+        setError("Ya existe un cierre de caja para este kiosco en la fecha seleccionada");
+        setIsSubmitting(false);
+        return;
+      }
+      
       await createCierreCaja(kioscoId, formData);
       router.push(`/dashboard/kioscos/${kioscoId}/cierres`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error al crear el cierre de caja';
-      
-      // Verificar si es error de duplicado
+
       if (errorMessage.includes('DUPLICATE_CIERRE')) {
         setIsDuplicateError(true);
-        setError("Ya existe un cierre de caja para la fecha seleccionada");
+        setError("Ya existe un cierre de caja para este kiosco en la fecha seleccionada");
       } else {
         setError(errorMessage);
       }
-      
+
       setIsSubmitting(false);
     }
   }
@@ -80,8 +116,8 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
         {error && (
           <div className={`border px-4 py-3 rounded mb-4 ${
-            isDuplicateError 
-              ? "bg-yellow-100 border-yellow-400 text-yellow-800" 
+            isDuplicateError
+              ? "bg-yellow-100 border-yellow-400 text-yellow-800"
               : "bg-red-100 border-red-400 text-red-700"
           }`}>
             {error}
@@ -114,7 +150,10 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
               name="fecha"
               required
               defaultValue={formattedDate}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                cierresExistentes.includes(formattedDate) ? 'bg-green-100 border-green-500 text-green-800' : 'border-gray-300'
+              }`}
+              onChange={(e) => setFormattedDate(e.target.value)}
             />
           </div>
 
@@ -129,9 +168,10 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+              disabled={isSubmitting || cierresExistentes.includes(formattedDate)}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isSubmitting || cierresExistentes.includes(formattedDate) ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
             >
               {isSubmitting ? 'Guardando...' : 'Guardar'}
             </button>
