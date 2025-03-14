@@ -9,9 +9,10 @@ const app = express() // Instancia de express
 const port = process.env.PORT || 5000; // Puerto de la app
 
 app.use(express.json()); // Middleware para parsear el body de las peticiones
-console.log(process.env.FRONTEND_URL);
+
 app.use(cors({
     origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 })); // Middleware para habilitar CORS
