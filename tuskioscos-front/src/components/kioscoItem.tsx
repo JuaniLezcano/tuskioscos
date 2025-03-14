@@ -24,13 +24,13 @@ export function KioscoItem({ kiosco }: KioscoItemProps) {
       {isOpen && (
         <div className="flex justify-end gap-4 mt-4">
           <Link 
-            href={`/kioscos/${kiosco.id}/metricas`}
+            href={`/dashboard/kioscos/${kiosco.id}/metricas`}
             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
           >
             Métricas
           </Link>
           <Link 
-            href={`/kioscos/${kiosco.id}/cierres/nuevo`}
+            href={`/dashboard/kioscos/${kiosco.id}/cierres/nuevo`}
             className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition"
           >
             Cerrar Caja

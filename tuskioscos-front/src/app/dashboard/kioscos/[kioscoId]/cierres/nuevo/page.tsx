@@ -52,7 +52,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
     try {
       await createCierreCaja(kioscoId, formData);
-      router.push(`/kioscos/${kioscoId}/cierres`);
+      router.push(`/dashboard/kioscos/${kioscoId}/cierres`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error al crear el cierre de caja');
       setIsSubmitting(false);

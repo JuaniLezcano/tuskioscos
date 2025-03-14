@@ -25,6 +25,20 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return res.json();
 }
 
+export async function login(email: string, password: string){
+  return fetchAPI("/user/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function register(email: string, name: string, password: string){
+  return fetchAPI("/user/register", {
+    method: "POST",
+    body: JSON.stringify({ email, name, password }),
+  });
+}
+
 export async function getUser() {
   return fetchAPI("/user");
 }

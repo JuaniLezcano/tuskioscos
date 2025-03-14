@@ -38,7 +38,7 @@ export default function ListaCierresCaja({ params }: ListaCierresCajaProps) {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Cierres de Caja de {kiosco.name}</h1>
         <Link 
-          href={`/kioscos/${kioscoId}/cierres/nuevo`}
+          href={`/dashboard/kioscos/${kioscoId}/cierres/nuevo`}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
           Nuevo Cierre
@@ -82,13 +82,13 @@ export default function ListaCierresCaja({ params }: ListaCierresCajaProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link 
-                      href={`/kioscos/${kioscoId}/cierres/${cierre.id}`}
+                      href={`/dashboard/kioscos/${kioscoId}/cierres/${cierre.id}`}
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
                       Ver
                     </Link>
                     <Link 
-                      href={`/kioscos/${kioscoId}/cierres/${cierre.id}/editar`}
+                      href={`/dashboard/kioscos/${kioscoId}/cierres/${cierre.id}/editar`}
                       className="text-gray-600 hover:text-gray-900"
                     >
                       Editar
