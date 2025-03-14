@@ -28,3 +28,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 export async function getUser() {
   return fetchAPI("/user");
 }
+
+export async function logout(){
+  return fetchAPI("/user/logout")
+}

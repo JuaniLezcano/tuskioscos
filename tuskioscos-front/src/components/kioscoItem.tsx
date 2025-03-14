@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Kiosco } from '@/types';
 
 interface KioscoItemProps {
   kiosco: Kiosco;
 }
-
 
 export function KioscoItem({ kiosco }: KioscoItemProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,8 +23,18 @@ export function KioscoItem({ kiosco }: KioscoItemProps) {
       </div>
       {isOpen && (
         <div className="flex justify-end gap-4 mt-4">
-          <button className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">Métricas</button>
-          <button className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition">Cerrar Caja</button>
+          <Link 
+            href={`/kioscos/${kiosco.id}/metricas`}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Métricas
+          </Link>
+          <Link 
+            href={`/kioscos/${kiosco.id}/cierres/nuevo`}
+            className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition"
+          >
+            Cerrar Caja
+          </Link>
         </div>
       )}
     </div>
