@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getKioscos, createKiosco, updateKiosco, deleteKiosco } from "@/app/actions/kioscos";
+import { clientFetch } from "@/utils/api";
 import { Kiosco } from "@/types";
 import { FiEdit, FiTrash, FiPlus, FiX } from "react-icons/fi";
 
@@ -63,21 +63,47 @@ export default function KioscosClient() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletingKiosco, setDeletingKiosco] = useState<Kiosco | null>(null);
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                setLoading(true);
-                const data = await getKioscos();
-                setKioscos(data);
-            } catch (error) {
-                console.error("Error fetching kioscos:", error);
-                setError("No se pudieron cargar los kioscos");
-            } finally {
-                setLoading(false);
-            }
+    // Función para obtener todos los kioscos
+    const fetchKioscos = async () => {
+        try {
+            setLoading(true);
+            const data = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos`);
+            setKioscos(data);
+            setError(null);
+        } catch (error) {
+            console.error("Error fetching kioscos:", error);
+            setError("No se pudieron cargar los kioscos");
+        } finally {
+            setLoading(false);
         }
-        fetchData();
+    };
+
+    useEffect(() => {
+        fetchKioscos();
     }, []);
+
+    // Función para crear un nuevo kiosco
+    const createKiosco = async (name: string) => {
+        return clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos`, {
+            method: 'POST',
+            body: JSON.stringify({ name })
+        });
+    };
+
+    // Función para actualizar un kiosco
+    const updateKiosco = async (kioscoId: number, name: string) => {
+        return clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos/${kioscoId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name })
+        });
+    };
+
+    // Función para eliminar un kiosco
+    const deleteKiosco = async (kioscoId: number) => {
+        return clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos/${kioscoId}`, {
+            method: 'DELETE'
+        });
+    };
 
     function handleOpenModal() {
         setIsModalOpen(true);

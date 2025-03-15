@@ -19,14 +19,14 @@ export function HeaderUser({ name }: UserMenuProps) {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/logout`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include",
             });
 
             if (!response.ok) {
                 const responseData = await response.json();
                 throw new Error(responseData.error || `Error ${response.status}`);
             }
-
+            
+            localStorage.removeItem('token');
             router.push("/login"); 
         } catch (error: any) {
             console.log("Error en fetchData:", error.message);

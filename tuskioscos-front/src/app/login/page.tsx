@@ -23,7 +23,6 @@ async function fetchData(data: LoginFormData) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data),
-      credentials: "include",
     });
 
     const responseData = await response.json();
@@ -57,8 +56,11 @@ export default function LoginForm() {
       setServerError(null);
       console.log("Enviando datos:", data);
       const response = await fetchData(data);
-      if (response){
-        router.push("/dashboard")
+      
+      // Guarda el token en localStorage
+      if (response && response.token) {
+          localStorage.setItem('token', response.token);
+          router.push("/dashboard");
       }
     } catch (error) {
         if (error instanceof Error) {

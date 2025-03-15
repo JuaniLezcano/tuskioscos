@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createCierreCaja, getAllCierreCaja } from '@/app/actions/cierreCaja';
 import { use } from 'react';
 import Header from '@/components/header';
 import { User } from '@/types';
-import { getUser } from '@/app/actions/user';
+import { clientFetch } from '@/utils/api';
 
 interface NuevoCierreCajaProps {
   params: Promise<{
@@ -26,6 +25,9 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   const kioscoId = parseInt(resolvedParams.kioscoId);
   const [formattedDate, setFormattedDate] = useState('');
 
+  // URL base del backend
+  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   useEffect(() => {
     const today = new Date();
     setFormattedDate(today.toISOString().split('T')[0]);
@@ -34,7 +36,8 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   useEffect(() => {
     async function loadUser() {
       try {
-        const userData = await getUser();
+        // Ajustado para coincidir con la ruta original
+        const userData = await clientFetch(`${API_URL}/api/user`);
         setUser(userData);
       } catch (err) {
         console.error("Error al cargar usuario:", err);
@@ -45,8 +48,8 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
     async function fetchCierres() {
       try {
-        // Asegúrate que getAllCierreCaja filtra por kioscoId
-        const cierres = await getAllCierreCaja(kioscoId);
+        // Ajustado para coincidir con la ruta original
+        const cierres = await clientFetch(`${API_URL}/cierreCaja/${kioscoId}`);
         setCierresExistentes(
           cierres.map((cierre: { fecha: any }) => {
             const fecha = new Date(cierre.fecha);
@@ -60,7 +63,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
     loadUser();
     fetchCierres();
-  }, [kioscoId]);
+  }, [kioscoId, API_URL]);
 
   useEffect(() => {
     if (error) {
@@ -72,23 +75,35 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
     }
   }, [error]);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     setIsDuplicateError(false);
 
+    const formElement = e.target as HTMLFormElement;
+    const formData = new FormData(formElement);
+    const monto = formData.get('monto') as string;
+    const fecha = formData.get('fecha') as string;
+
     try {
       // Verifica si ya existe un cierre para este kiosco específico y esta fecha
-      const fechaSeleccionada = formData.get('fecha') as string;
-      
-      if (cierresExistentes.includes(fechaSeleccionada)) {
+      if (cierresExistentes.includes(fecha)) {
         setIsDuplicateError(true);
         setError("Ya existe un cierre de caja para este kiosco en la fecha seleccionada");
         setIsSubmitting(false);
         return;
       }
       
-      await createCierreCaja(kioscoId, formData);
+      // Ajustado para coincidir con la ruta original
+      await clientFetch(`${API_URL}/cierreCaja/${kioscoId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          monto: Number.parseFloat(monto),
+          fecha
+        })
+      });
+      
       router.push(`/dashboard/kioscos/${kioscoId}/cierres`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error al crear el cierre de caja';
@@ -130,7 +145,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
           </div>
         )}
 
-        <form action={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="monto" className="block text-sm font-medium text-gray-700 mb-2">
               Monto

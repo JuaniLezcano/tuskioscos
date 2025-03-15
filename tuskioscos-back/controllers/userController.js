@@ -40,17 +40,10 @@ exports.login = async (req, res) => {
     if (!valid) {
         return res.status(400).json({ error: "Invalid credentials" });
     }
+
     const token = generateToken(user.id);
 
-    res.cookie("token", token, {
-        httpOnly: true,   // Evita acceso desde JS
-        secure: true, 
-        sameSite: "none", // Importante para cookies cross-origin
-        path: "/",
-        domain: ".railway.app",
-    });
-
-    res.json({ success: true, message: "Login exitoso" });
+    res.json({ success: true, message: "Login exitoso", token: token });
 };
 
 exports.logout = (req, res) => {
