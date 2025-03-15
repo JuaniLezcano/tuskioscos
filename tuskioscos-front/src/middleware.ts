@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
+  console.log(token)
   const isOnDashboard = req.nextUrl.pathname.startsWith("/dashboard");
 
   if (!token && isOnDashboard) {
