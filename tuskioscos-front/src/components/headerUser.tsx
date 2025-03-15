@@ -27,7 +27,7 @@ export function HeaderUser({ name }: UserMenuProps) {
             }
             
             localStorage.removeItem('token');
-            router.push("/login"); 
+            router.push("/"); 
         } catch (error: any) {
             console.log("Error en fetchData:", error.message);
         }

@@ -33,7 +33,15 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-500">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="flex justify-center items-center h-screen">Error: {error}</div>;
   if (!user) return null;
 

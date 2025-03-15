@@ -25,8 +25,6 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
   const kioscoId = parseInt(resolvedParams.kioscoId);
   const [formattedDate, setFormattedDate] = useState('');
 
-  // URL base del backend
-  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     const today = new Date();
@@ -37,7 +35,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
     async function loadUser() {
       try {
         // Ajustado para coincidir con la ruta original
-        const userData = await clientFetch(`${API_URL}/api/user`);
+        const userData = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`);
         setUser(userData);
       } catch (err) {
         console.error("Error al cargar usuario:", err);
@@ -49,7 +47,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
     async function fetchCierres() {
       try {
         // Ajustado para coincidir con la ruta original
-        const cierres = await clientFetch(`${API_URL}/cierreCaja/${kioscoId}`);
+        const cierres = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}`);
         setCierresExistentes(
           cierres.map((cierre: { fecha: any }) => {
             const fecha = new Date(cierre.fecha);
@@ -63,7 +61,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
     loadUser();
     fetchCierres();
-  }, [kioscoId, API_URL]);
+  }, [kioscoId]);
 
   useEffect(() => {
     if (error) {
@@ -96,7 +94,7 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
       }
       
       // Ajustado para coincidir con la ruta original
-      await clientFetch(`${API_URL}/cierreCaja/${kioscoId}`, {
+      await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}`, {
         method: 'POST',
         body: JSON.stringify({
           monto: Number.parseFloat(monto),

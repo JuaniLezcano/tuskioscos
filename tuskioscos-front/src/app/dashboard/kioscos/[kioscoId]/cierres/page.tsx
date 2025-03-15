@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAllCierreCaja, updateCierreCaja } from '@/app/actions/cierreCaja';
+import { clientFetch } from '@/utils/api';
 import Link from 'next/link';
 import { CierreCaja } from '@/types';
-import { getKiosco } from '@/app/actions/kioscos';
-import { getUser } from '@/app/actions/user';
 import Header from '@/components/header';
 import { useParams } from 'next/navigation';
 
@@ -33,9 +31,9 @@ export default function ListaCierresCaja() {
       try {
         setLoading(true);
         const [userResult, kioscoResult, cierresResult] = await Promise.all([
-          getUser(),
-          getKiosco(kioscoId),
-          getAllCierreCaja(kioscoId)
+          clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`),
+          clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos/${kioscoId}`),
+          clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}`)
         ]);
         
         setUser(userResult);
@@ -101,7 +99,12 @@ export default function ListaCierresCaja() {
       const formData = new FormData();
       formData.append('monto', monto);
       
-      await updateCierreCaja(kioscoId, selectedCierre.id, formData);
+      const id = selectedCierre.id
+
+      await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}`), {
+        method: 'PUT',
+        body: JSON.stringify({ id, formData })
+      }
       
       setSuccess('Cierre de caja actualizado correctamente');
       
