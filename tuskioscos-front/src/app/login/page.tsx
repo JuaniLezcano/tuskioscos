@@ -26,7 +26,6 @@ async function fetchData(data: LoginFormData) {
     });
 
     const responseData = await response.json();
-    console.log(responseData);
 
     if (!response.ok) {
       throw new Error(responseData.error || `Error ${response.status}`);    
@@ -54,7 +53,6 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setServerError(null);
-      console.log("Enviando datos:", data);
       const response = await fetchData(data);
       
       // Guarda el token en localStorage
@@ -80,7 +78,7 @@ export default function LoginForm() {
 
   return (
     <div className='flex items-center justify-center min-h-screen'>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg w-full mx-auto p-4 border rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-lg w-full mx-auto p-6 border rounded-lg shadow-lg">
         <div>
           <label className="block text-md font-medium pb-2">Email</label>
           <input

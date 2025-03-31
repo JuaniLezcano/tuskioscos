@@ -25,20 +25,20 @@ export default function Header({ user }: UserProps) {
 
   return (
     <div className='bg-gray-custom shadow-sm'>
-      <div className='max-w-full mx-auto py-4 px-6 flex items-center justify-between'>
-        <div className="flex items-center">
-          {pathname !== '/dashboard' && (
-            <button onClick={navigateToDashboard} className="mr-4">
-              <FiHome className="text-2xl" />
-            </button>
-          )}
-        </div>
-        <div className='flex items-center justify-end' onClick={toggleMenu}>
+      <div className='max-w-full mx-auto py-4 px-6 flex items-center justify-around md:justify-end'>
+        {pathname !== '/dashboard' && (
+          <div className="flex items-center">
+              <button onClick={navigateToDashboard} className="mr-4">
+                <FiHome className="text-2xl" />
+              </button>  
+          </div>
+        )}
+        <div className='flex items-center' onClick={toggleMenu}>
           <ProfileImage name={user.name} />
         </div>
       </div>
       {isMenuOpen && (
-        <div className='absolute right-6 top-16'>
+        <div className='flex justify-center'>
           <HeaderUser name={user.name} />
         </div>
       )}

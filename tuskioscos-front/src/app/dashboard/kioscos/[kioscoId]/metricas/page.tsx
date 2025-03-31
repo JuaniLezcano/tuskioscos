@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { CierreCaja, Kiosco, User } from '@/types'
-import { metric1 } from '@/app/actions/cierreCaja'
 import { useParams } from 'next/navigation'
 import Header from '@/components/header'
-import { getUser } from '@/app/actions/user';
-import { getKiosco } from '@/app/actions/kioscos'
+import { clientFetch } from '@/utils/api'
 
 export default function Metricas() {
   const { kioscoId } = useParams()
@@ -26,14 +24,14 @@ export default function Metricas() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const userData = await getUser();
+        const userData = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`);
         setUser(userData);
   
         if (!kioscoId) {
           throw new Error('ID de kiosco no encontrado');
         }
   
-        const kioscoData = await getKiosco(Number(kioscoId));
+        const kioscoData = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kioscos/${kioscoId}`);
         setKiosco(kioscoData);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -69,8 +67,18 @@ export default function Metricas() {
         throw new Error('ID de kiosco inválido')
       }
 
-      const data = await metric1(fecha1, fecha2, kioscoIdNumber)
-      setMetrics(data)
+      const response = await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoIdNumber}`)
+      const cierresEntreFechas = response.filter((cierre : CierreCaja) => {
+        const fechaCierre = new Date(cierre.fecha)
+        return fechaCierre >= fecha1 && fechaCierre <= fecha2
+      })
+    
+      // Ordenar por fecha (más reciente primero)
+      cierresEntreFechas.sort((a : CierreCaja, b : CierreCaja) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+    
+      // Calcular días laborales (días con cierre de caja)
+      const diasLaborales = cierresEntreFechas.length
+      setMetrics({cierresEntreFechas, diasLaborales})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar métricas')
       console.error('Error fetching metrics:', err)

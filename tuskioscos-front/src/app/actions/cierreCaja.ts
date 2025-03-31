@@ -161,27 +161,3 @@ export async function deleteCierreCaja(kioscoId: number, cierreCajaId: number): 
     throw new Error("No se pudo eliminar el cierre de caja")
   }
 }
-
-/**
- * Obtengo las métricas de cierre de caja entre fechas
- */
-export async function metric1(fecha1: Date, fecha2: Date, kioscoId: number) {
-  const response = await getAllCierreCaja(kioscoId)
-
-  // Filtrar cierres entre las fechas seleccionadas
-  const cierresEntreFechas = response.filter((cierre) => {
-    const fechaCierre = new Date(cierre.fecha)
-    return fechaCierre >= fecha1 && fechaCierre <= fecha2
-  })
-
-  // Ordenar por fecha (más reciente primero)
-  cierresEntreFechas.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-
-  // Calcular días laborales (días con cierre de caja)
-  const diasLaborales = cierresEntreFechas.length
-
-  return {
-    cierresEntreFechas,
-    diasLaborales,
-  }
-}

@@ -51,7 +51,7 @@ export default function RegisterForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg w-full mx-auto p-4 border rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-lg w-full mx-auto p-4 border rounded-lg shadow-lg">
         <div>
           <label className="block text-md font-medium pb-2">Nombre</label>
           <input type="text" {...register("name")} className="w-full p-2 border rounded-lg" />
