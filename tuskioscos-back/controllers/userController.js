@@ -47,8 +47,7 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-    res.clearCookie("token");
-    res.json({ message: "Logout exitoso" });
+    res.json({ success: true, message: "Logout exitoso" });
 };
 
 exports.infoUser = async (req, res) => {

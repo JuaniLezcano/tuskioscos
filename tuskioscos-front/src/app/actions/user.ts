@@ -44,5 +44,7 @@ export async function getUser() {
 }
 
 export async function logout(){
-  return fetchAPI("/user/logout")
+  return fetchAPI("/user/logout", {
+    method: "POST"
+  });
 }

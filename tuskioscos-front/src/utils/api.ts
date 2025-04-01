@@ -1,4 +1,3 @@
-// utils/api.ts
 "use client";
 
 export const clientFetch = async (url: string, options: RequestInit = {}) => {

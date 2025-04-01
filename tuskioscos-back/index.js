@@ -13,7 +13,6 @@ app.use(express.json()); // Middleware para parsear el body de las peticiones
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"] 
 })); // Middleware para habilitar CORS
 

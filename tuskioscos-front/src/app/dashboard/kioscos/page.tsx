@@ -15,14 +15,13 @@ export default function KioscosGrid() {
                 setUser(userData);
             } catch (error) {
                 console.error("Error fetching user:", error);
-                // Handle error appropriately
             } finally {
                 setLoading(false);
             }
         }
 
         fetchUser();
-    }, []);// Obtener usuario en el servidor
+    }, []); // Obtener usuario en el servidor
     
     if (loading) {
         return (
