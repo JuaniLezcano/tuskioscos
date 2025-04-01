@@ -35,7 +35,7 @@ export function KioscoItem({ kiosco }: KioscoItemProps) {
           </Link>
           <Link
             href={`/dashboard/kioscos/${kiosco.id}/cierres/nuevo`}
-            className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition"
+            className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-950 transition"
             onClick={(e) => e.stopPropagation()}
           >
             Cerrar Caja

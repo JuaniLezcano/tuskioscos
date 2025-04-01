@@ -78,12 +78,12 @@ export default function Header({ user }: UserProps) {
             <hr className='my-3' />
             <button
               onClick={GestionarKioscos}
-              className='w-full flex items-center justify-center bg-black-custom text-white py-2 rounded-lg mb-2 hover:bg-gray-700 transition'>
+              className='w-full flex items-center justify-center bg-black-custom text-white py-2 rounded-lg mb-2 hover:bg-gray-950 transition'>
               <FiSettings className="mr-2" /> Gestionar Kioscos
             </button>
             <button
               onClick={CerrarSesion}
-              className='w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-400 transition'>
+              className='w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition'>
               <FiLogOut className="mr-2" /> Cerrar Sesión
             </button>
             <hr className='my-3' />
