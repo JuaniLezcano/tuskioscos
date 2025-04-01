@@ -64,11 +64,8 @@ export default function Header({ user }: UserProps) {
         {pathname === '/dashboard' && (
           <h1 className='text-xl font-bold text-black-custom'>Tuskioscos</h1>
         )}
-        {/* Espaciador para alinear correctamente el usuario en laptops */}
-        <div className="flex-grow md:hidden"></div>
 
-        {/* Contenedor de la imagen de perfil (siempre alineado a la derecha en laptops) */}
-        <div className='relative flex items-center' onClick={toggleMenu}>
+        <div className='relative flex items-center cursor-pointer' onClick={toggleMenu}>
           <ProfileImage name={user.name} />
         </div>
       </div>
