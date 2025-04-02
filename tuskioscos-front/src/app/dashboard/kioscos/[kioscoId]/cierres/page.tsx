@@ -88,26 +88,25 @@ export default function ListaCierresCaja() {
   // Manejar la actualización del cierre de caja
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!selectedCierre) return;
-
+  
     try {
       setIsSubmitting(true);
       setError(null);
-
-      // Crear FormData para enviar al server action
-      const formData = new FormData();
-      formData.append('monto', monto);
-
-      const id = selectedCierre.id
-
-      await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}`), {
+  
+      const id = selectedCierre.id;
+  
+      await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}/${selectedCierre.id}`, {
         method: 'PUT',
-        body: JSON.stringify({ id, formData })
-      }
-
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, monto: parseFloat(monto) })
+      });
+  
       setSuccess('Cierre de caja actualizado correctamente');
-
+  
       // Actualizar los datos localmente sin recargar la página
       const updatedCierres = cierresCaja.map(cierre =>
         cierre.id === selectedCierre.id
@@ -115,12 +114,12 @@ export default function ListaCierresCaja() {
           : cierre
       );
       setCierresCaja(updatedCierres);
-
+  
       // Cerrar el modal después de un breve tiempo
       setTimeout(() => {
         closeModal();
       }, 1500);
-
+  
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar el cierre de caja');
     } finally {
