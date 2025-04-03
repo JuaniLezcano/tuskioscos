@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { CierreCaja } from '@/types';
 import Header from '@/components/header';
 import { useParams } from 'next/navigation';
+import { format, parseISO } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { es } from 'date-fns/locale';
 
 export default function ListaCierresCaja() {
   const params = useParams();
@@ -50,13 +53,12 @@ export default function ListaCierresCaja() {
     fetchData();
   }, [kioscoId]);
 
-  // Función para formatear fechas
+  
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    const zonedDate = toZonedTime(dateObj, 'UTC');
+
+    return format(zonedDate, 'dd/MM/yyyy', { locale: es });
   };
 
   // Función para formatear montos
