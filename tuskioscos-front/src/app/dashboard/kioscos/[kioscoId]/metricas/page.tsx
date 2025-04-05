@@ -5,6 +5,9 @@ import { CierreCaja, Kiosco, User } from '@/types'
 import { useParams } from 'next/navigation'
 import Header from '@/components/header'
 import { clientFetch } from '@/utils/api'
+import { format, parseISO } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { es } from 'date-fns/locale';
 
 export default function Metricas() {
   const { kioscoId } = useParams()
@@ -12,7 +15,7 @@ export default function Metricas() {
   const [kiosco, setKiosco] = useState<Kiosco | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: getOneMonthAgo(),
-    endDate: formatDate(new Date())
+    endDate: getTodayISO()
   })
   const [metrics, setMetrics] = useState<{
     cierresEntreFechas: CierreCaja[],
@@ -41,15 +44,24 @@ export default function Metricas() {
     fetchData();
     fetchMetrics();
   }, [kioscoId]); 
-  function getOneMonthAgo() {
-    const today = new Date()
-    const oneMonthAgo = new Date()
-    oneMonthAgo.setMonth(today.getMonth() - 1)
-    return formatDate(oneMonthAgo)
+  
+  function getTodayISO() {
+    return new Date().toISOString().split('T')[0]
   }
+  
+  function getOneMonthAgo() {
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    return oneMonthAgo.toISOString().split('T')[0]; // yyyy-MM-dd
+  }
+  
 
-  function formatDate(date: Date) {
-    return date.toISOString().split('T')[0]
+  function formatDate(date: Date | string) {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    const zonedDate = toZonedTime(dateObj, 'UTC');
+
+    return format(zonedDate, 'dd/MM/yyyy', { locale: es });
   }
 
   async function fetchMetrics() {
@@ -58,7 +70,7 @@ export default function Metricas() {
       setError(null)
 
       const fecha1 = new Date(dateRange.startDate)
-      const fecha2 = new Date(dateRange.endDate)
+      const fecha2 = new Date(dateRange.endDate + 'T23:59:59.999Z')
 
       // Ensure kioscoId is a number
       const kioscoIdNumber = Number(kioscoId)
@@ -199,7 +211,7 @@ export default function Metricas() {
                   {metrics.cierresEntreFechas.map((cierre) => (
                     <tr key={cierre.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {new Date(cierre.fecha).toLocaleDateString('es-AR')}
+                        {formatDate(new Date(cierre.fecha))}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap font-medium">
                         {formatCurrency(cierre.monto)}
