@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { CierreCaja } from '@/types';
 import Header from '@/components/header';
 import { useParams } from 'next/navigation';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, set } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
@@ -21,12 +21,13 @@ export default function ListaCierresCaja() {
   const [loading, setLoading] = useState(true);
 
   // Estado para controlar el modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setisEditModalOpen] = useState(false);
   const [selectedCierre, setSelectedCierre] = useState<CierreCaja | null>(null);
   const [monto, setMonto] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Fetch data al montar el componente
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function ListaCierresCaja() {
     fetchData();
   }, [kioscoId]);
 
-  
   const formatDate = (date: Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     const zonedDate = toZonedTime(dateObj, 'UTC');
@@ -75,30 +75,72 @@ export default function ListaCierresCaja() {
     setMonto(cierre.monto.toString());
     setError(null);
     setSuccess(null);
-    setIsModalOpen(true);
+    setisEditModalOpen(true);
+  };
+
+  const openDeleteModal = (cierre: CierreCaja) => {
+    setSelectedCierre(cierre);
+    setError(null);
+    setSuccess(null)
+    setIsDeleteModalOpen(true);
   };
 
   // Cerrar modal
   const closeModal = () => {
-    setIsModalOpen(false);
+    setisEditModalOpen(false);
+    setIsDeleteModalOpen(false);
     setSelectedCierre(null);
     setMonto('');
     setError(null);
     setSuccess(null);
   };
 
-  // Manejar la actualización del cierre de caja
-  const handleUpdate = async (e: React.FormEvent) => {
+  // Función para eliminar un kiosco
+  const deleteKiosco = async (cierreId: number) => {
+    return clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}/${cierreId}`, {
+      method: 'DELETE'
+    });
+  };
+
+  const handleDelete = async (e: React.FormEvent) => {
     e.preventDefault();
-  
     if (!selectedCierre) return;
-  
+
     try {
       setIsSubmitting(true);
       setError(null);
-  
+
+      await deleteKiosco(selectedCierre.id);
+
+      setSuccess('Cierre de caja eliminado correctamente');
+
+      const updatedCierres = cierresCaja.filter(cierre => cierre.id !== selectedCierre.id);
+      
+      setCierresCaja(updatedCierres);
+
+      setTimeout(() => {
+        closeModal();
+      }, 1500);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar el cierre de caja');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Manejar la actualización del cierre de caja
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedCierre) return;
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
       const id = selectedCierre.id;
-  
+
       await clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}/${selectedCierre.id}`, {
         method: 'PUT',
         headers: {
@@ -106,9 +148,9 @@ export default function ListaCierresCaja() {
         },
         body: JSON.stringify({ id, monto: parseFloat(monto) })
       });
-  
+
       setSuccess('Cierre de caja actualizado correctamente');
-  
+
       // Actualizar los datos localmente sin recargar la página
       const updatedCierres = cierresCaja.map(cierre =>
         cierre.id === selectedCierre.id
@@ -116,12 +158,12 @@ export default function ListaCierresCaja() {
           : cierre
       );
       setCierresCaja(updatedCierres);
-  
+
       // Cerrar el modal después de un breve tiempo
       setTimeout(() => {
         closeModal();
       }, 1500);
-  
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar el cierre de caja');
     } finally {
@@ -205,7 +247,7 @@ export default function ListaCierresCaja() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Monto
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-14 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -229,6 +271,15 @@ export default function ListaCierresCaja() {
                           </svg>
                           Editar
                         </button>
+                        <button
+                          onClick={() => openDeleteModal(cierre)}
+                          className="text-red-600 hover:text-red-800 transition-colors inline-flex items-center ml-4"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-6 0V5a1 1 0 011-1h4a1 1 0 011 1v2" />
+                          </svg>
+                          Borrar
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -240,7 +291,7 @@ export default function ListaCierresCaja() {
       </div>
 
       {/* Modal de edición */}
-      {isModalOpen && selectedCierre && (
+      {isEditModalOpen && selectedCierre && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-fadeIn">
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -339,6 +390,74 @@ export default function ListaCierresCaja() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de eliminación */}
+      {isDeleteModalOpen && selectedCierre && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden animate-fadeIn">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-800">Borrar Cierre de Caja</h2>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-800 focus:outline-none"
+                aria-label="Cerrar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleDelete} className="p-6">
+              <p className="text-gray-700 mb-4">¿Estás seguro de que deseas eliminar el cierre de caja del {formatDate(selectedCierre.fecha)}?</p>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+              {success && (
+                <div className="mt-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+                  <div className="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {success}
+                  </div>
+                </div>
+              )}
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+                  <div className="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {error}
+                  </div>
+                </div>
+              )}
+            </form>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+                <div className="flex">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {error}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
