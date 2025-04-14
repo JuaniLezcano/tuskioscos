@@ -42,7 +42,7 @@ export default function ListaCierresCaja() {
 
         setUser(userResult);
         setKiosco(kioscoResult);
-        setCierresCaja(cierresResult);
+        setCierresCaja(cierresResult.sort((a: CierreCaja, b: CierreCaja) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()));
       } catch (err) {
         console.error('Error loading data:', err);
         setError('Error al cargar los datos');
