@@ -56,7 +56,7 @@ export default function ListaCierresCaja() {
 
   const formatDate = (date: Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    const zonedDate = toZonedTime(dateObj, 'UTC');
+    const zonedDate = toZonedTime(dateObj, 'America/Argentina/Buenos_Aires');
 
     return format(zonedDate, 'dd/MM/yyyy', { locale: es });
   };

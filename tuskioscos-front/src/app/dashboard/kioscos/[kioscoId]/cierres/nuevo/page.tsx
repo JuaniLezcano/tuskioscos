@@ -27,8 +27,10 @@ export default function NuevoCierreCaja({ params }: NuevoCierreCajaProps) {
 
 
   useEffect(() => {
-    const today = new Date();
-    setFormattedDate(today.toISOString().split('T')[0]);
+    const now = new Date();
+    now.setHours(now.getHours() - 3);
+    const formatted = now.toISOString().split('T')[0];
+    setFormattedDate(formatted);
   }, []);
 
   useEffect(() => {
