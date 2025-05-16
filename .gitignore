@@ -47,3 +47,6 @@ yarn-error.log*
 /tuskioscos-back/*.tsbuildinfo
 /tuskioscos-front/next-env.d.ts
 /tuskioscos-back/next-env.d.ts
+
+# docs
+docs/
