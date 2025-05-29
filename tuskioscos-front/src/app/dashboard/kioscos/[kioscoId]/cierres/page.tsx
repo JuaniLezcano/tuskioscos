@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { CierreCaja } from '@/types';
 import Header from '@/components/header';
 import { useParams } from 'next/navigation';
-import { format, parseISO, set } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 export default function ListaCierresCaja() {
@@ -55,8 +55,8 @@ export default function ListaCierresCaja() {
   }, [kioscoId]);
 
   const formatDate = (date: string | Date) => {
-    const dateObj = new Date(date);
-    return format(dateObj, 'dd/MM/yyyy', { locale: es });
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    return formatInTimeZone(dateObj, 'UTC', 'dd/MM/yyyy', { locale: es });
   };
   
 

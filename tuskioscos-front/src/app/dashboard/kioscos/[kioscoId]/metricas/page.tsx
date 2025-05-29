@@ -5,8 +5,8 @@ import { CierreCaja, Kiosco, User } from '@/types'
 import { useParams } from 'next/navigation'
 import Header from '@/components/header'
 import { clientFetch } from '@/utils/api'
-import { format, parseISO } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 export default function Metricas() {
@@ -56,13 +56,10 @@ export default function Metricas() {
     return oneMonthAgo.toISOString().split('T')[0]; // yyyy-MM-dd
   }
   
-
-  function formatDate(date: Date | string) {
+  const formatDate = (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    const zonedDate = toZonedTime(dateObj, 'UTC');
-
-    return format(zonedDate, 'dd/MM/yyyy', { locale: es });
-  }
+    return formatInTimeZone(dateObj, 'UTC', 'dd/MM/yyyy', { locale: es });
+  };
 
   async function fetchMetrics() {
     try {
