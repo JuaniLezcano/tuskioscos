@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { CierreCaja } from '@/types';
 import Header from '@/components/header';
 import { useParams } from 'next/navigation';
-import { format, parseISO, set } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 export default function ListaCierresCaja() {
@@ -54,12 +54,11 @@ export default function ListaCierresCaja() {
     fetchData();
   }, [kioscoId]);
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    const zonedDate = toZonedTime(dateObj, 'America/Argentina/Buenos_Aires');
-
-    return format(zonedDate, 'dd/MM/yyyy', { locale: es });
+    return formatInTimeZone(dateObj, 'UTC', 'dd/MM/yyyy', { locale: es });
   };
+  
 
   // Función para formatear montos
   const formatMonto = (monto: number) => {
@@ -95,8 +94,8 @@ export default function ListaCierresCaja() {
     setSuccess(null);
   };
 
-  // Función para eliminar un kiosco
-  const deleteKiosco = async (cierreId: number) => {
+  // Función para eliminar un cierre de caja
+  const deleteCierreCaja = async (cierreId: number) => {
     return clientFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cierreCaja/${kioscoId}/${cierreId}`, {
       method: 'DELETE'
     });
@@ -110,7 +109,7 @@ export default function ListaCierresCaja() {
       setIsSubmitting(true);
       setError(null);
 
-      await deleteKiosco(selectedCierre.id);
+      await deleteCierreCaja(selectedCierre.id);
 
       setSuccess('Cierre de caja eliminado correctamente');
 
