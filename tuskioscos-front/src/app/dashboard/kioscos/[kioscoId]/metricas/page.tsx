@@ -45,16 +45,30 @@ export default function Metricas() {
     fetchMetrics();
   }, [kioscoId]); 
   
-  function getTodayISO() {
-    return new Date().toISOString().split('T')[0]
+ function getTodayISO() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getOneMonthAgo() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const day = today.getDate();
+
+  const oneMonthAgo = new Date(year, month - 1, 1);
+  const lastDayOfMonth = new Date(year, month, 0).getDate();
+  oneMonthAgo.setDate(Math.min(day, lastDayOfMonth));
+
+  const y = oneMonthAgo.getFullYear();
+  const m = String(oneMonthAgo.getMonth() + 1).padStart(2, '0');
+  const d = String(oneMonthAgo.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
   }
-  
-  function getOneMonthAgo() {
-    const today = new Date();
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(today.getMonth() - 1);
-    return oneMonthAgo.toISOString().split('T')[0]; // yyyy-MM-dd
-  }
+
   
   const formatDate = (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
